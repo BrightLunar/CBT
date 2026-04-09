@@ -1,0 +1,699 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device_width, initial-scale=1.0">
+    <title>수학 임용 CBT</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        .setup-group { margin-bottom: 25px; text-align: left; background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        
+        /* 토글(아코디언) 리스트 스타일 */
+        details { margin-bottom: 10px; background: white; border: 1px solid #ddd; border-radius: 5px; overflow: hidden; }
+        summary { padding: 10px; background: #eef2f5; font-size: 16px; cursor: pointer; list-style: none; font-weight: bold; }
+        summary::-webkit-details-marker { display: none; }
+        summary:hover { background: #e1e7ec; }
+        .unit-list { padding: 10px 15px 10px 30px; font-size: 14px; color: #444; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        .flex-row { display: flex; align-items: center; gap: 15px; }
+        input[type="number"] { width: 70px; padding: 5px; font-size: 14px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; background-color: #007BFF; color: white; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        img { max-width: 100%; border: 1px solid #ddd; margin-top: 15px; border-radius: 5px; }
+        .center { text-align: center; }
+
+        /* 듀얼 슬라이더 커스텀 CSS */
+        .range-slider-container { position: relative; width: 300px; height: 30px; display: flex; align-items: center; }
+        .range-track { position: absolute; width: 100%; height: 6px; background-color: #ddd; border-radius: 3px; z-index: 1; }
+        .range-slider-container input[type="range"] {
+            position: absolute;
+            width: 100%;
+            background: transparent;
+            pointer-events: none;
+            z-index: 2;
+            margin: 0;
+        }
+        .range-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            pointer-events: all;
+            width: 20px; height: 20px;
+            background-color: #007BFF;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .credit-banner {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 13px;
+            color: #555;
+            z-index: 1000;
+            border: 1px solid #eee;
+        }
+        .credit-banner a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .credit-banner a:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="credit-banner">
+        Made by <strong>고려대학교 수학교육과 21학번 김민재</strong> | Powered by Gemini |
+        <a href="https://github.com/BrightLunar/-CBT" target="_blank">로컬 구동용 파일 (GitHub)</a>
+    </div>
+
+    <div id="setup-view" class="container">
+        <h1 class="center">중등교원임용시험 수학과 CBT</h1>
+        
+        <div class="setup-group">
+            <h3>1. 출제 범위 선택</h3>
+            <div style="margin-bottom: 10px;">
+                <button onclick="setAllCheckboxes(true)" style="padding: 5px 10px; font-size: 12px; background-color: #6c757d;">전체 선택</button>
+                <button onclick="setAllCheckboxes(false)" style="padding: 5px 10px; font-size: 12px; background-color: #6c757d;">전체 해제</button>
+            </div>
+            <div id="checkbox-area">서버에서 과목 데이터를 불러오는 중입니다...</div>
+        </div>
+
+        <div class="setup-group">
+            <h3>2. 출제 연도 설정</h3>
+            <h5>(연도 혼합형과 2000년도 이전은 2000년 포함시 자동 포함)</h5>
+            <div class="flex-row">
+                <div class="range-slider-container">
+                    <div class="range-track"></div>
+                    <input type="range" id="start-year-slider" min="1900" max="9999" value="2000" oninput="syncDualSlider('start')">
+                    <input type="range" id="end-year-slider" min="1900" max="9999" value="9999" oninput="syncDualSlider('end')">
+                </div>
+                <input type="number" id="start-year-input" min="1900" max="9999" value="2000" onchange="syncDualInput('start')">
+                <span> ~ </span>
+                <input type="number" id="end-year-input" min="1900" max="9999" value="9999" onchange="syncDualInput('end')">
+            </div>
+        </div>
+
+        <div class="setup-group">
+            <h3>3. 시험 옵션</h3>
+            <div class="flex-row">
+                <label>출제 문항 수: <input type="number" id="q-count" value="10" min="1"></label>
+                <label style="margin-left: 20px; cursor: pointer;">
+                    <input type="checkbox" id="use-timer"> 시간 재기 (타이머)
+                </label>
+            </div>
+        </div>
+
+        <div class="center">
+            <button onclick="startExam()" style="width: 200px; padding: 15px;">시험 시작</button>
+        </div>
+    </div>
+
+    <div id="test-view" class="container hidden center">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="quitExam()" style="background-color: #dc3545; padding: 5px 10px; font-size: 14px;">시험 중단</button>
+            <h2 id="progress-text" style="color: #007BFF; margin: 0;">0 / 0</h2>
+            <div style="width: 80px;"></div> </div>
+        
+        <p id="meta-text" style="color: #aaa; font-weight: bold; margin-top: 15px;"></p>
+        
+        <div id="question-area">
+            <img id="q-img" src="">
+        </div>
+        
+        <button id="reveal-btn" onclick="revealAnswer()" style="background-color: #28a745;">정답 확인</button>
+        
+        <div id="answer-area" class="hidden">
+            <img id="a-img" src="">
+            <br>
+            <button onclick="nextQuestion()">다음 문제</button>
+        </div>
+    </div>
+
+    <div id="finish-view" class="container hidden center">
+        <h1 style="color: #28a745; font-size: 36px;">시험 종료!</h1>
+        <h2 id="time-result" class="hidden"></h2>
+        <button onclick="resetToSetup()" style="margin-top: 30px;">처음으로 돌아가기</button>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let isTimerActive = false;
+        let currentMetaData = "";  
+        let examQuestions = [];
+        let currentIndex = 0;
+
+        window.onload = async () => {
+            // --- 연도 자동 동기화 (올해 연도로 Max값 설정) ---
+            const currentYear = new Date().getFullYear();
+            const yearElements = ['start-year-slider', 'start-year-input', 'end-year-slider', 'end-year-input'];
+            
+            yearElements.forEach(id => {
+                document.getElementById(id).max = currentYear;
+                document.getElementById(id).min = 2000;
+            });
+            // 끝나는 연도의 기본값을 현재 연도로 셋팅
+            document.getElementById('end-year-slider').value = currentYear;
+            document.getElementById('end-year-input').value = currentYear;
+
+            // --- 서버에서 과목/단원 정보 로드 ---
+            const area = document.getElementById('checkbox-area');
+            try {
+                const res = await fetch('/api/info');
+                if (!res.ok) throw new Error("서버 응답 오류");
+                const subjects = await res.json();
+                
+                area.innerHTML = '';
+                subjects.forEach(sub => {
+                    // <details> 태그로 토글(아코디언) 구현
+                    let html = `<details>
+                        <summary>
+                            <input type="checkbox" class="sub-cb" data-sub="${sub.code}" checked onclick="toggleUnits(this, event)"> 
+                            ${sub.name}
+                        </summary>
+                        <div class="unit-list">`;
+                    
+                    sub.units.forEach(unit => {
+                        html += `<label><input type="checkbox" class="unit-cb" data-sub="${sub.code}" value="${sub.code}_${unit.code}" checked> ${unit.name}</label>`;
+                    });
+                    
+                    html += `</div></details>`;
+                    area.innerHTML += html;
+                });
+            } catch (error) {
+                area.innerHTML = `<span style="color:red;">데이터베이스를 불러올 수 없습니다. 서버가 켜져 있는지 확인하세요.</span>`;
+            }
+        };
+
+        // --- 과목 체크박스 조작 로직 ---
+        function toggleUnits(subCb, event) {
+            event.stopPropagation(); // 체크박스 클릭 시 토글이 접히는 현상 방지
+            const subCode = subCb.getAttribute('data-sub');
+            const unitCbs = document.querySelectorAll(`.unit-cb[data-sub="${subCode}"]`);
+            unitCbs.forEach(cb => cb.checked = subCb.checked);
+        }
+
+        // --- 모든 체크박스 일괄 선택/해제 함수 ---
+        function setAllCheckboxes(checked) {
+            // 모든 과목 체크박스와 단원 체크박스를 찾아서 상태 변경
+            const allCbs = document.querySelectorAll('.sub-cb, .unit-cb');
+            allCbs.forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        // --- 듀얼 슬라이더 동기화 및 꼬임(Start > End) 방지 ---
+        function syncDualSlider(changed) {
+            let startSl = document.getElementById('start-year-slider');
+            let endSl = document.getElementById('end-year-slider');
+            let startIn = document.getElementById('start-year-input');
+            let endIn = document.getElementById('end-year-input');
+
+            let startVal = parseInt(startSl.value);
+            let endVal = parseInt(endSl.value);
+
+            // 시작값이 끝값보다 커지는 것 방지
+            if (startVal > endVal) {
+                if (changed === 'start') startSl.value = endVal;
+                else endSl.value = startVal;
+            }
+
+            startIn.value = startSl.value;
+            endIn.value = endSl.value;
+        }
+
+        function syncDualInput(changed) {
+            let startSl = document.getElementById('start-year-slider');
+            let endSl = document.getElementById('end-year-slider');
+            let startIn = document.getElementById('start-year-input');
+            let endIn = document.getElementById('end-year-input');
+
+            let startVal = parseInt(startIn.value);
+            let endVal = parseInt(endIn.value);
+
+            if (startVal > endVal) {
+                if (changed === 'start') startIn.value = endVal;
+                else endIn.value = startVal;
+            }
+
+            startSl.value = startIn.value;
+            endSl.value = endIn.value;
+        }
+
+        async function startExam() {
+            const checkedUnits = Array.from(document.querySelectorAll('.unit-cb:checked')).map(cb => cb.value);
+            
+            if (checkedUnits.length === 0) {
+                alert("최소 하나의 단원을 선택해주세요!");
+                return;
+            }
+
+            const payload = {
+                units: checkedUnits,
+                startY: parseInt(document.getElementById('start-year-input').value),
+                endY: parseInt(document.getElementById('end-year-input').value),
+                count: parseInt(document.getElementById('q-count').value)
+            };
+
+            const res = await fetch('/api/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            // 가져온 문제가 하나도 없을 때
+            if (result.poolSize === 0 || result.questions.length === 0) {
+                alert("조건에 맞는 문제가 없습니다. 범위를 넓혀보세요.");
+                return;
+            }
+
+            // 💡 서버에서 받은 문제 배열을 브라우저(로컬)에 저장
+            examQuestions = result.questions;
+            currentIndex = 0;
+
+            isTimerActive = document.getElementById('use-timer').checked;
+            if (isTimerActive) startTime = Date.now();
+
+            document.getElementById('setup-view').classList.add('hidden');
+            document.getElementById('test-view').classList.remove('hidden');
+            
+            // 첫 문제 렌더링
+            renderCurrentQuestion();
+        }
+
+        // 💡 서버 통신 없이 브라우저 내의 배열 데이터로 화면만 변경
+        function renderCurrentQuestion() {
+            const q = examQuestions[currentIndex];
+            
+            document.getElementById('q-img').src = q.qPath;
+            document.getElementById('a-img').src = q.aPath;
+            
+            currentMetaData = q.displayName; 
+            document.getElementById('meta-text').innerText = "🔒 출제 범위 비공개 (정답 확인 시 공개)";
+            document.getElementById('meta-text').style.color = "#aaa";
+            
+            document.getElementById('progress-text').innerText = `진행: ${currentIndex + 1} / ${examQuestions.length}`;
+            
+            document.getElementById('answer-area').classList.add('hidden');
+            document.getElementById('reveal-btn').classList.remove('hidden');
+        }
+
+        function revealAnswer() {
+            document.getElementById('answer-area').classList.remove('hidden');
+            document.getElementById('reveal-btn').classList.add('hidden');
+
+            document.getElementById('meta-text').innerText = currentMetaData;
+            document.getElementById('meta-text').style.color = "gray";
+        }
+
+        // 💡 서버 통신 없이 인덱스만 1 증가시킴
+        function nextQuestion() {
+            if (currentIndex + 1 < examQuestions.length) {
+                currentIndex++;
+                renderCurrentQuestion();
+            } else {
+                finishExam(); // 마지막 문제인 경우
+            }
+        }
+
+        function quitExam() {
+            if (confirm("정말 시험을 중단하고 설정 화면으로 돌아가시겠습니까?")) {
+                document.getElementById('test-view').classList.add('hidden');
+                document.getElementById('setup-view').classList.remove('hidden');
+                isTimerActive = false; 
+                examQuestions = []; // 브라우저 메모리 비우기
+            }
+        }
+
+        function finishExam() {
+            document.getElementById('test-view').classList.add('hidden');
+            document.getElementById('finish-view').classList.remove('hidden');
+
+            const timeLabel = document.getElementById('time-result');
+            if (isTimerActive) {
+                const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+                const min = Math.floor(elapsedSec / 60);
+                const sec = elapsedSec % 60;
+                timeLabel.innerText = `총 소요 시간: ${min}분 ${sec}초`;
+                timeLabel.classList.remove('hidden');
+            } else {
+                timeLabel.classList.add('hidden');
+            }
+        }
+
+        function resetToSetup() {
+            document.getElementById('finish-view').classList.add('hidden');
+            document.getElementById('setup-view').classList.remove('hidden');
+        }
+    </script>
+</body>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device_width, initial-scale=1.0">
+    <title>수학 임용 CBT</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        .setup-group { margin-bottom: 25px; text-align: left; background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        
+        /* 토글(아코디언) 리스트 스타일 */
+        details { margin-bottom: 10px; background: white; border: 1px solid #ddd; border-radius: 5px; overflow: hidden; }
+        summary { padding: 10px; background: #eef2f5; font-size: 16px; cursor: pointer; list-style: none; font-weight: bold; }
+        summary::-webkit-details-marker { display: none; }
+        summary:hover { background: #e1e7ec; }
+        .unit-list { padding: 10px 15px 10px 30px; font-size: 14px; color: #444; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        .flex-row { display: flex; align-items: center; gap: 15px; }
+        input[type="number"] { width: 70px; padding: 5px; font-size: 14px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; border: none; border-radius: 5px; background-color: #007BFF; color: white; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        img { max-width: 100%; border: 1px solid #ddd; margin-top: 15px; border-radius: 5px; }
+        .center { text-align: center; }
+
+        /* 듀얼 슬라이더 커스텀 CSS */
+        .range-slider-container { position: relative; width: 300px; height: 30px; display: flex; align-items: center; }
+        .range-track { position: absolute; width: 100%; height: 6px; background-color: #ddd; border-radius: 3px; z-index: 1; }
+        .range-slider-container input[type="range"] {
+            position: absolute;
+            width: 100%;
+            background: transparent;
+            pointer-events: none;
+            z-index: 2;
+            margin: 0;
+        }
+        .range-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            pointer-events: all;
+            width: 20px; height: 20px;
+            background-color: #007BFF;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setup-view" class="container">
+        <h1 class="center">중등교원임용시험 수학과 CBT</h1>
+        
+        <div class="setup-group">
+            <h3>1. 출제 범위 선택</h3>
+            <div style="margin-bottom: 10px;">
+                <button onclick="setAllCheckboxes(true)" style="padding: 5px 10px; font-size: 12px; background-color: #6c757d;">전체 선택</button>
+                <button onclick="setAllCheckboxes(false)" style="padding: 5px 10px; font-size: 12px; background-color: #6c757d;">전체 해제</button>
+            </div>
+            <div id="checkbox-area">서버에서 과목 데이터를 불러오는 중입니다...</div>
+        </div>
+
+        <div class="setup-group">
+            <h3>2. 출제 연도 설정</h3>
+            <h5>(연도 혼합형과 2000년도 이전은 2000년 포함시 자동 포함)</h5>
+            <div class="flex-row">
+                <div class="range-slider-container">
+                    <div class="range-track"></div>
+                    <input type="range" id="start-year-slider" min="1900" max="9999" value="2000" oninput="syncDualSlider('start')">
+                    <input type="range" id="end-year-slider" min="1900" max="9999" value="9999" oninput="syncDualSlider('end')">
+                </div>
+                <input type="number" id="start-year-input" min="1900" max="9999" value="2000" onchange="syncDualInput('start')">
+                <span> ~ </span>
+                <input type="number" id="end-year-input" min="1900" max="9999" value="9999" onchange="syncDualInput('end')">
+            </div>
+        </div>
+
+        <div class="setup-group">
+            <h3>3. 시험 옵션</h3>
+            <div class="flex-row">
+                <label>출제 문항 수: <input type="number" id="q-count" value="10" min="1"></label>
+                <label style="margin-left: 20px; cursor: pointer;">
+                    <input type="checkbox" id="use-timer"> 시간 재기 (타이머)
+                </label>
+            </div>
+        </div>
+
+        <div class="center">
+            <button onclick="startExam()" style="width: 200px; padding: 15px;">시험 시작</button>
+        </div>
+    </div>
+
+    <div id="test-view" class="container hidden center">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="quitExam()" style="background-color: #dc3545; padding: 5px 10px; font-size: 14px;">시험 중단</button>
+            <h2 id="progress-text" style="color: #007BFF; margin: 0;">0 / 0</h2>
+            <div style="width: 80px;"></div> </div>
+        
+        <p id="meta-text" style="color: #aaa; font-weight: bold; margin-top: 15px;"></p>
+        
+        <div id="question-area">
+            <img id="q-img" src="">
+        </div>
+        
+        <button id="reveal-btn" onclick="revealAnswer()" style="background-color: #28a745;">정답 확인</button>
+        
+        <div id="answer-area" class="hidden">
+            <img id="a-img" src="">
+            <br>
+            <button onclick="nextQuestion()">다음 문제</button>
+        </div>
+    </div>
+
+    <div id="finish-view" class="container hidden center">
+        <h1 style="color: #28a745; font-size: 36px;">시험 종료!</h1>
+        <h2 id="time-result" class="hidden"></h2>
+        <button onclick="resetToSetup()" style="margin-top: 30px;">처음으로 돌아가기</button>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let isTimerActive = false;
+        let currentMetaData = "";  
+        let examQuestions = [];
+        let currentIndex = 0;
+
+        // --- 창 닫을 때 서버 자동 종료 ---
+        window.addEventListener('beforeunload', () => {
+            navigator.sendBeacon('/api/shutdown');
+        });
+
+        window.onload = async () => {
+            // --- 연도 자동 동기화 (올해 연도로 Max값 설정) ---
+            const currentYear = new Date().getFullYear();
+            const yearElements = ['start-year-slider', 'start-year-input', 'end-year-slider', 'end-year-input'];
+            
+            yearElements.forEach(id => {
+                document.getElementById(id).max = currentYear;
+                document.getElementById(id).min = 2000;
+            });
+            // 끝나는 연도의 기본값을 현재 연도로 셋팅
+            document.getElementById('end-year-slider').value = currentYear;
+            document.getElementById('end-year-input').value = currentYear;
+
+            // --- 서버에서 과목/단원 정보 로드 ---
+            const area = document.getElementById('checkbox-area');
+            try {
+                const res = await fetch('/api/info');
+                if (!res.ok) throw new Error("서버 응답 오류");
+                const subjects = await res.json();
+                
+                area.innerHTML = '';
+                subjects.forEach(sub => {
+                    // <details> 태그로 토글(아코디언) 구현
+                    let html = `<details>
+                        <summary>
+                            <input type="checkbox" class="sub-cb" data-sub="${sub.code}" checked onclick="toggleUnits(this, event)"> 
+                            ${sub.name}
+                        </summary>
+                        <div class="unit-list">`;
+                    
+                    sub.units.forEach(unit => {
+                        html += `<label><input type="checkbox" class="unit-cb" data-sub="${sub.code}" value="${sub.code}_${unit.code}" checked> ${unit.name}</label>`;
+                    });
+                    
+                    html += `</div></details>`;
+                    area.innerHTML += html;
+                });
+            } catch (error) {
+                area.innerHTML = `<span style="color:red;">데이터베이스를 불러올 수 없습니다. 서버가 켜져 있는지 확인하세요.</span>`;
+            }
+        };
+
+        // --- 과목 체크박스 조작 로직 ---
+        function toggleUnits(subCb, event) {
+            event.stopPropagation(); // 체크박스 클릭 시 토글이 접히는 현상 방지
+            const subCode = subCb.getAttribute('data-sub');
+            const unitCbs = document.querySelectorAll(`.unit-cb[data-sub="${subCode}"]`);
+            unitCbs.forEach(cb => cb.checked = subCb.checked);
+        }
+
+        // --- 모든 체크박스 일괄 선택/해제 함수 ---
+        function setAllCheckboxes(checked) {
+            // 모든 과목 체크박스와 단원 체크박스를 찾아서 상태 변경
+            const allCbs = document.querySelectorAll('.sub-cb, .unit-cb');
+            allCbs.forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        // --- 듀얼 슬라이더 동기화 및 꼬임(Start > End) 방지 ---
+        function syncDualSlider(changed) {
+            let startSl = document.getElementById('start-year-slider');
+            let endSl = document.getElementById('end-year-slider');
+            let startIn = document.getElementById('start-year-input');
+            let endIn = document.getElementById('end-year-input');
+
+            let startVal = parseInt(startSl.value);
+            let endVal = parseInt(endSl.value);
+
+            // 시작값이 끝값보다 커지는 것 방지
+            if (startVal > endVal) {
+                if (changed === 'start') startSl.value = endVal;
+                else endSl.value = startVal;
+            }
+
+            startIn.value = startSl.value;
+            endIn.value = endSl.value;
+        }
+
+        function syncDualInput(changed) {
+            let startSl = document.getElementById('start-year-slider');
+            let endSl = document.getElementById('end-year-slider');
+            let startIn = document.getElementById('start-year-input');
+            let endIn = document.getElementById('end-year-input');
+
+            let startVal = parseInt(startIn.value);
+            let endVal = parseInt(endIn.value);
+
+            if (startVal > endVal) {
+                if (changed === 'start') startIn.value = endVal;
+                else endIn.value = startVal;
+            }
+
+            startSl.value = startIn.value;
+            endSl.value = endIn.value;
+        }
+
+        async function startExam() {
+            const checkedUnits = Array.from(document.querySelectorAll('.unit-cb:checked')).map(cb => cb.value);
+            
+            if (checkedUnits.length === 0) {
+                alert("최소 하나의 단원을 선택해주세요!");
+                return;
+            }
+
+            const payload = {
+                units: checkedUnits,
+                startY: parseInt(document.getElementById('start-year-input').value),
+                endY: parseInt(document.getElementById('end-year-input').value),
+                count: parseInt(document.getElementById('q-count').value)
+            };
+
+            const res = await fetch('/api/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            // 가져온 문제가 하나도 없을 때
+            if (result.poolSize === 0 || result.questions.length === 0) {
+                alert("조건에 맞는 문제가 없습니다. 범위를 넓혀보세요.");
+                return;
+            }
+
+            // 💡 서버에서 받은 문제 배열을 브라우저(로컬)에 저장
+            examQuestions = result.questions;
+            currentIndex = 0;
+
+            isTimerActive = document.getElementById('use-timer').checked;
+            if (isTimerActive) startTime = Date.now();
+
+            document.getElementById('setup-view').classList.add('hidden');
+            document.getElementById('test-view').classList.remove('hidden');
+            
+            // 첫 문제 렌더링
+            renderCurrentQuestion();
+        }
+
+        // 💡 서버 통신 없이 브라우저 내의 배열 데이터로 화면만 변경
+        function renderCurrentQuestion() {
+            const q = examQuestions[currentIndex];
+            
+            document.getElementById('q-img').src = q.qPath;
+            document.getElementById('a-img').src = q.aPath;
+            
+            currentMetaData = q.displayName; 
+            document.getElementById('meta-text').innerText = "🔒 출제 범위 비공개 (정답 확인 시 공개)";
+            document.getElementById('meta-text').style.color = "#aaa";
+            
+            document.getElementById('progress-text').innerText = `진행: ${currentIndex + 1} / ${examQuestions.length}`;
+            
+            document.getElementById('answer-area').classList.add('hidden');
+            document.getElementById('reveal-btn').classList.remove('hidden');
+        }
+
+        function revealAnswer() {
+            document.getElementById('answer-area').classList.remove('hidden');
+            document.getElementById('reveal-btn').classList.add('hidden');
+
+            document.getElementById('meta-text').innerText = currentMetaData;
+            document.getElementById('meta-text').style.color = "gray";
+        }
+
+        // 💡 서버 통신 없이 인덱스만 1 증가시킴
+        function nextQuestion() {
+            if (currentIndex + 1 < examQuestions.length) {
+                currentIndex++;
+                renderCurrentQuestion();
+            } else {
+                finishExam(); // 마지막 문제인 경우
+            }
+        }
+
+        function quitExam() {
+            if (confirm("정말 시험을 중단하고 설정 화면으로 돌아가시겠습니까?")) {
+                document.getElementById('test-view').classList.add('hidden');
+                document.getElementById('setup-view').classList.remove('hidden');
+                isTimerActive = false; 
+                examQuestions = []; // 브라우저 메모리 비우기
+            }
+        }
+
+        function finishExam() {
+            document.getElementById('test-view').classList.add('hidden');
+            document.getElementById('finish-view').classList.remove('hidden');
+
+            const timeLabel = document.getElementById('time-result');
+            if (isTimerActive) {
+                const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+                const min = Math.floor(elapsedSec / 60);
+                const sec = elapsedSec % 60;
+                timeLabel.innerText = `총 소요 시간: ${min}분 ${sec}초`;
+                timeLabel.classList.remove('hidden');
+            } else {
+                timeLabel.classList.add('hidden');
+            }
+        }
+
+        function resetToSetup() {
+            document.getElementById('finish-view').classList.add('hidden');
+            document.getElementById('setup-view').classList.remove('hidden');
+        }
+    </script>
+</body>
+>>>>>>> 876cdbc (Synchronising)
+</html>
