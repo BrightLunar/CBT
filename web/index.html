@@ -39,10 +39,8 @@
             -webkit-appearance: none;
             pointer-events: all;
             width: 20px; height: 20px;
-            background-color: #007BFF;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .credit-banner {
             position: fixed;
@@ -71,9 +69,9 @@
 </head>
 <body>
 
-    <div class="credit-banner">
-        Made by <strong>고려대학교 수학교육과 21학번 김민재</strong> | Powered by Gemini |
-        <a href="https://github.com/BrightLunar/-CBT" target="_blank">로컬 구동용 파일 (GitHub)</a>
+    <div id="main-header" class="credit-banner">
+        Made by <strong>고려대학교 수학교육과 21학번 김민재</strong> | 26.04.12. 전과목 업데이트 완료 | 오류 제보는 rlaalswo2491@korea.ac.kr | 
+        <a href="https://github.com/BrightLunar/CBT" target="_blank">로컬 구동용 파일 (GitHub)</a>
     </div>
 
     <div id="setup-view" class="container">
@@ -283,8 +281,9 @@
 
             isTimerActive = document.getElementById('use-timer').checked;
             if (isTimerActive) startTime = Date.now();
-
+            
             document.getElementById('setup-view').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
             document.getElementById('test-view').classList.remove('hidden');
             
             // 첫 문제 렌더링
@@ -330,6 +329,8 @@
             if (confirm("정말 시험을 중단하고 설정 화면으로 돌아가시겠습니까?")) {
                 document.getElementById('test-view').classList.add('hidden');
                 document.getElementById('setup-view').classList.remove('hidden');
+                document.getElementById('main-header').classList.remove('hidden');
+    
                 isTimerActive = false; 
                 examQuestions = []; // 브라우저 메모리 비우기
             }
@@ -352,6 +353,7 @@
         }
 
         function resetToSetup() {
+            document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('finish-view').classList.add('hidden');
             document.getElementById('setup-view').classList.remove('hidden');
         }
